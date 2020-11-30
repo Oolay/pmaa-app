@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Bar } from '@vx/shape'
 import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
@@ -47,23 +47,28 @@ function getYMinAndMax(data: DataPoint[]): MinMaxY {
     }, {minY: Infinity, maxY: -Infinity})
 }
 
+const width = 750
+const height = 300
+
+const margin = {
+    top: 60,
+    bottom: 60,
+    left: 80,
+    right: 80
+}
+
 const Graph: React.FC<Props> = ({ data }) => {
-    const width = 750
-    const height = 300
+    const graphContainer = useRef<HTMLDivElement>(null)
 
-    const getX = (data: DataPoint) => data.x
-    const getY = (data: DataPoint) => data.y
-
-    const margin = {
-        top: 60,
-        bottom: 60,
-        left: 80,
-        right: 80
-    }
+    useEffect(() => {
+        graphContainer.current?.addEventListener('click', (event: MouseEvent) => {
+            console.log('EVENT', event)
+        })
+    })
 
     // Graph bounds
-    const xGraphMax = width
-    const yGraphMax = height - 120
+    const xGraphMax = width - margin.bottom - 50
+    const yGraphMax = height - margin.top - 50
 
     // Data bounds
     const { minX, maxX } = getXMinAndMax(data)
@@ -81,13 +86,10 @@ const Graph: React.FC<Props> = ({ data }) => {
         round: true,
     })
 
-    console.log('mockData', data)
-    console.log('minMaxX', getXMinAndMax(data))
-
     return (
-        <div>
+        <div ref={graphContainer}>
             <svg height={height} width={width}>
-                <Group>
+                <Group top={margin.top} left={margin.left}>
                     <AxisLeft
                         scale={yScale}
                         top={0}

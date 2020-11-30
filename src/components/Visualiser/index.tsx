@@ -7,6 +7,8 @@ import Graph from './Graph'
 
 const useStyles = makeStyles({
     container: {
+        display: 'flex',
+        border: '1px solid black',
         padding: '2rem',
     }
 })
@@ -15,7 +17,7 @@ const Visualiser: React.FC = () => {
     const classes = useStyles({})
 
     return (
-        <div className={classes.container}>
+        <div>
             <Graph data={mockData(200)} />
         </div>
     )
