@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Bar } from '@vx/shape'
+import { Bar, Polygon } from '@vx/shape'
 import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
+import { localPoint } from '@vx/event';
+import { isParenthesizedExpression } from 'typescript'
+
 
 export interface DataPoint {
     x: number
@@ -57,14 +60,21 @@ const margin = {
     right: 80
 }
 
+interface Point {
+    x: number
+    y: number
+}
+
 const Graph: React.FC<Props> = ({ data }) => {
     const graphContainer = useRef<HTMLDivElement>(null)
+    const zoomRect = useRef<SVGRectElement>(null)
+    const [isZooming, setIsZooming] = useState<boolean>(false)
+    const zoomX = useRef<number>(0)
+    const moveX = useRef<number>(0)
 
-    useEffect(() => {
-        graphContainer.current?.addEventListener('click', (event: MouseEvent) => {
-            console.log('EVENT', event)
-        })
-    })
+    const zoomWidthRef = useRef<number>(0)
+    const [zoomWidth, setZoomWidth] = useState<number>(0)
+    const requestRef = useRef<number>()
 
     // Graph bounds
     const xGraphMax = width - margin.bottom - 50
@@ -86,8 +96,40 @@ const Graph: React.FC<Props> = ({ data }) => {
         round: true,
     })
 
+    const changeZoomRectWidth = () => {
+        const width = (moveX.current - margin.left) - zoomX.current
+
+        zoomWidthRef.current = width
+        setZoomWidth(zoomWidthRef.current)
+    }
+
+    const animationLoop = () => {
+        requestRef.current = requestAnimationFrame(animationLoop)
+
+        changeZoomRectWidth()
+    }
+
+    useEffect(() => {
+        if (isZooming) {
+            graphContainer.current?.addEventListener('mousemove', ({ x, y }: MouseEvent) => {
+                moveX.current = x
+                requestRef.current = requestAnimationFrame(animationLoop)
+            })
+        }
+        graphContainer.current?.addEventListener('click', ({ x, y }: MouseEvent) => {
+            zoomX.current = x - margin.left
+            setIsZooming(preState => !preState)
+        })
+
+        return () => {
+            window.cancelAnimationFrame(requestRef.current as number)
+        }
+    }, [isZooming])
+
     return (
-        <div ref={graphContainer}>
+        <div
+            ref={graphContainer}
+        >
             <svg height={height} width={width}>
                 <Group top={margin.top} left={margin.left}>
                     <AxisLeft
@@ -120,6 +162,19 @@ const Graph: React.FC<Props> = ({ data }) => {
                                 />
                             )
                         })
+                    }
+                    {
+                        isZooming && (
+                            <rect
+                                ref={zoomRect}
+                                x={zoomX.current}
+                                y={0}
+                                width={zoomWidthRef.current}
+                                height={yGraphMax}
+                                fill='blue'
+                                opacity={0.4}
+                            />
+                        )
                     }
                 </Group>
             </svg>
