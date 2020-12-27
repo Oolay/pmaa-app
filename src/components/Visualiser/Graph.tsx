@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import { makeStyles } from '@material-ui/styles'
-import { Bar, Polygon } from '@vx/shape'
+import { Bar } from '@vx/shape'
 import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
-import { localPoint } from '@vx/event';
-import { relative } from 'path'
 
 const useStyles = makeStyles({
     graphContainer: {
@@ -26,6 +24,7 @@ export interface DataPoint {
 
 interface Props {
     data: DataPoint[]
+    onDataZoom: (xMin: number, xMax: number) => void
 }
 
 interface MinMaxX {
@@ -86,11 +85,12 @@ const INIITIAL_ZOOM_RECT = {
     width: 0,
 }
 
-const Graph: React.FC<Props> = ({ data }) => {
+const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
     const classNames = useStyles({})
 
     const graphContainer = useRef<HTMLDivElement>(null)
 
+    // Zoom rectangle
     const [isZooming, setIsZooming] = useState<boolean>(false)
     const zoomData = useRef<ZoomData>(INIITIAL_ZOOM_RECT)
     const [zoomRect, setZoomRect] = useState<ZoomData>(INIITIAL_ZOOM_RECT)
@@ -107,6 +107,12 @@ const Graph: React.FC<Props> = ({ data }) => {
     const xScale = scaleLinear({
         domain: [minX, maxX],
         range: [0, xGraphMax],
+        round: true,
+    })
+
+    const xScaleReverse = scaleLinear({
+        domain: [0, xGraphMax],
+        range: [minX, maxX],
         round: true,
     })
 
@@ -140,11 +146,20 @@ const Graph: React.FC<Props> = ({ data }) => {
     }
 
     const handleGraphClick = ({ pageX }: React.MouseEvent<HTMLDivElement>) => {
+        const graphX = eventXToGraphX(pageX)
+
+        if (graphX < 0 || graphX > xGraphMax) {
+            return
+        }
+
         if (isZooming) {
+            onDataZoom(
+                xScaleReverse(zoomData.current.rectX) as number,
+                xScaleReverse(zoomData.current.rectX + zoomData.current.width) as number,
+            )
             setIsZooming(false)
             clearZoomRect()
         } else {
-            const graphX = eventXToGraphX(pageX)
             zoomData.current = { ...zoomData.current, rectX: graphX, initialX: graphX }
 
             setIsZooming(true)
