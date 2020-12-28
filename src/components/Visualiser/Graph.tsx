@@ -5,6 +5,8 @@ import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
 
+import { getXMinAndMax, getYMinAndMax } from '../../utils/minMax'
+
 const useStyles = makeStyles({
     graphContainer: {
         display: 'flex',
@@ -26,40 +28,6 @@ export interface DataPoint {
 interface Props {
     data: DataPoint[]
     onDataZoom: (xMin: number, xMax: number) => void
-}
-
-interface MinMaxX {
-    minX: number
-    maxX: number
-}
-
-interface MinMaxY {
-    minY: number
-    maxY: number
-}
-
-function getXMinAndMax(data: DataPoint[]): MinMaxX {
-    return data.reduce(({ minX, maxX }, { x }) => {
-        const newMinX = x < minX ? x : minX
-        const newMaxX = x > maxX ? x : maxX
-
-        return {
-            minX: newMinX,
-            maxX: newMaxX,
-        }
-    }, {minX: Infinity, maxX: -Infinity})
-}
-
-function getYMinAndMax(data: DataPoint[]): MinMaxY {
-    return data.reduce(({ minY, maxY }, { y }) => {
-        const newMinY = y < minY ? y : minY
-        const newMaxY = y > maxY ? y : maxY
-
-        return {
-            minY: newMinY,
-            maxY: newMaxY,
-        }
-    }, {minY: Infinity, maxY: -Infinity})
 }
 
 const width = 750
