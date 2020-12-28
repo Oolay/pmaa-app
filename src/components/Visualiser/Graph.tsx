@@ -7,7 +7,8 @@ import { scaleLinear } from '@vx/scale'
 
 const useStyles = makeStyles({
     graphContainer: {
-        // position: 'relative',
+        display: 'flex',
+        justifyContent: 'center',
     },
     zoomBox: {
         zIndex: 100,
@@ -65,7 +66,7 @@ const width = 750
 const height = 300
 
 const margin = {
-    top: 60,
+    top: 30,
     bottom: 60,
     left: 80,
     right: 80
@@ -86,11 +87,12 @@ const INIITIAL_ZOOM_RECT = {
 }
 
 const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
-    const classNames = useStyles({})
+    const classes = useStyles({})
 
     const graphContainer = useRef<HTMLDivElement>(null)
 
     // Zoom rectangle
+    const graphSVG = useRef<SVGSVGElement>(null)
     const [isZooming, setIsZooming] = useState<boolean>(false)
     const zoomData = useRef<ZoomData>(INIITIAL_ZOOM_RECT)
     const [zoomRect, setZoomRect] = useState<ZoomData>(INIITIAL_ZOOM_RECT)
@@ -145,8 +147,13 @@ const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
         window.cancelAnimationFrame(requestRef.current as number)
     }
 
-    const handleGraphClick = ({ pageX }: React.MouseEvent<HTMLDivElement>) => {
-        const graphX = eventXToGraphX(pageX)
+    const handleGraphClick = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
+        if (!graphSVG.current) {
+            return
+        }
+
+        const { left } = graphSVG.current.getBoundingClientRect()
+        const graphX = eventXToGraphX(clientX - left)
 
         if (graphX < 0 || graphX > xGraphMax) {
             return
@@ -166,12 +173,17 @@ const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
         }
     }
 
-    const handleZoomMove = ({ pageX }: React.MouseEvent<HTMLDivElement>) => {
+    const handleZoomMove = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
         if (!isZooming) {
             return
         }
 
-        let graphX = eventXToGraphX(pageX)
+        if (!graphSVG.current) {
+            return
+        }
+
+        const { left } = graphSVG.current.getBoundingClientRect()
+        let graphX = eventXToGraphX(clientX - left)
 
         if (graphX < 0) {
             graphX = 0
@@ -193,11 +205,11 @@ const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
     return (
         <div
             ref={graphContainer}
-            className={classNames.graphContainer}
+            className={classes.graphContainer}
             onClick={handleGraphClick}
             onMouseMove={handleZoomMove}
         >
-            <svg height={height} width={width}>
+            <svg ref={graphSVG} height={height} width={width}>
                 <Group top={margin.top} left={margin.left}>
                     <AxisLeft
                         scale={yScale}

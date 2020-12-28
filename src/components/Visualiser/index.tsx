@@ -3,13 +3,14 @@ import { makeStyles } from '@material-ui/styles'
 
 import mockData from '../../utils/getMockData'
 
+import ActionButtons from './ActionButtons'
 import Graph, { DataPoint } from './Graph'
 
 const useStyles = makeStyles({
     container: {
         display: 'flex',
-        border: '1px solid black',
-        padding: '2rem',
+        flexDirection: 'column',
+        justifyContent: 'center',
     }
 })
 
@@ -37,9 +38,11 @@ const Visualiser: React.FC = () => {
     }
 
     return (
-        <div>
-            <button onClick={onRefreshView}>refesh view</button>
-            <button onClick={onDataZoomBack}>back</button>
+        <div className={classes.container}>
+            <ActionButtons
+                onDataZoomBack={onDataZoomBack}
+                onRefreshView={onRefreshView}
+            />
             <Graph
                 data={getLatestZoomData(graphData)}
                 onDataZoom={onDataZoom}
