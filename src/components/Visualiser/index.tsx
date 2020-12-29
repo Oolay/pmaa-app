@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/styles'
 import mockData from '../../utils/getMockData'
 
 import ActionButtons from './ActionButtons'
-import Graph, { DataPoint } from './Graph'
+import Graph, { DataPoint, DataSet } from './Graph'
 
 const useStyles = makeStyles({
     container: {
@@ -14,17 +14,21 @@ const useStyles = makeStyles({
     }
 })
 
+type DataSetZoomHistory = DataSet[]
+
 const Visualiser: React.FC = () => {
     const classes = useStyles({})
-    const [graphData, setGraphData] = useState<DataPoint[][]>([mockData(200)])
+    const mockDataSet = mockData(200)
+    const [graphData, setGraphData] = useState<DataSetZoomHistory[]>([[mockDataSet, mockDataSet.map(({x, y}) => ({ x, y: y - 20 > 0 ? y - 20 : 0 }))]])
 
-    const getLatestZoomData = (graphData: DataPoint[][]) => graphData[graphData.length - 1]
+    const getLatestZoomData = (graphData: DataSetZoomHistory[]) => graphData[graphData.length - 1]
 
     const onDataZoom = (xMin: number, xMax: number) => {
         const latestData = getLatestZoomData(graphData)
-        const newData = latestData.filter(({ x }) => x >= xMin && x <= xMax)
-
-        setGraphData(prevState => [...prevState, newData])
+        const newData = latestData
+            .map(dataSet => dataSet.filter(({ x }) => x >= xMin && x <= xMax))
+        
+        setGraphData(prevState => [...prevState, [...newData]])
     }
 
     const onRefreshView = () => {
@@ -44,7 +48,7 @@ const Visualiser: React.FC = () => {
                 onRefreshView={onRefreshView}
             />
             <Graph
-                data={getLatestZoomData(graphData)}
+                dataSets={getLatestZoomData(graphData)}
                 onDataZoom={onDataZoom}
             />
         </div>

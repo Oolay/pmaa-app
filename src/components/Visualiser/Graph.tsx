@@ -5,7 +5,7 @@ import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
 
-import { getXMinAndMax, getYMinAndMax } from '../../utils/minMax'
+import { getMinMaxOfDataSets } from '../../utils/minMax'
 
 const useStyles = makeStyles({
     graphContainer: {
@@ -20,13 +20,17 @@ const useStyles = makeStyles({
         opacity: 0.4,
     }
 })
+
+
 export interface DataPoint {
     x: number
     y: number
 }
 
+export type DataSet = DataPoint[]
+
 interface Props {
-    data: DataPoint[]
+    dataSets: DataSet[]
     onDataZoom: (xMin: number, xMax: number) => void
 }
 
@@ -54,7 +58,7 @@ const INIITIAL_ZOOM_RECT = {
     width: 0,
 }
 
-const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
+const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     const classes = useStyles({})
 
     const graphContainer = useRef<HTMLDivElement>(null)
@@ -70,9 +74,8 @@ const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
     const xGraphMax = width - margin.left - 50
     const yGraphMax = height - margin.top - 50
 
-    // Data bounds
-    const { minX, maxX } = getXMinAndMax(data)
-    const { minY, maxY } = getYMinAndMax(data)
+    // DataSets bounds
+    const { minX, maxX, minY, maxY } = getMinMaxOfDataSets(dataSets)
 
     const xScale = scaleLinear({
         domain: [minX, maxX],
@@ -121,12 +124,16 @@ const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
         }
 
         const { left } = graphSVG.current.getBoundingClientRect()
-        const graphX = eventXToGraphX(clientX - left)
+        let graphX = eventXToGraphX(clientX - left)
 
-        if (graphX < 0 || graphX > xGraphMax) {
-            return
+        if (graphX < 0) {
+            graphX = 0
         }
 
+        if (graphX > xGraphMax) {
+            graphX = xGraphMax
+        }
+    
         if (isZooming) {
             onDataZoom(
                 xScaleReverse(zoomData.current.rectX) as number,
@@ -193,22 +200,24 @@ const Graph: React.FC<Props> = ({ data, onDataZoom }) => {
                         stroke={'#1b1a1e'}
                     />
                     {
-                        data.map(({ x, y }) => {
+                        dataSets.map((dataSet, setIndex) => dataSet.map(({ x, y }) => {
                             const barX = xScale(x)
                             const barY = yScale(y)
-                            const barWidth = 1
+                            const barWidth = 2
                             const barHeight = yGraphMax - (yScale(y) as number)
 
                             return (
                                 <Bar
-                                    key={x}
+                                    key={`${setIndex}-${x}`}
                                     x={barX}
                                     y={barY}
                                     width={barWidth}
                                     height={barHeight}
+                                    opacity={0.4}
+                                    fill={setIndex === 0 ? 'black' : 'red'}
                                 />
                             )
-                        })
+                        }))
                     }
                     {
                         isZooming && (
