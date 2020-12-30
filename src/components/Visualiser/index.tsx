@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { makeStyles } from '@material-ui/styles'
 
 import mockData from '../../utils/getMockData'
+import { MinMax } from '../../utils/minMax'
 
 import ActionButtons from './ActionButtons'
 import Graph, { DataPoint, DataSet } from './Graph'
@@ -23,10 +24,13 @@ const Visualiser: React.FC = () => {
 
     const getLatestZoomData = (graphData: DataSetZoomHistory[]) => graphData[graphData.length - 1]
 
-    const onDataZoom = (xMin: number, xMax: number) => {
+    const onDataZoom = ({ minX, maxX, maxY }: Omit<MinMax, 'minY'>) => {
         const latestData = getLatestZoomData(graphData)
         const newData = latestData
-            .map(dataSet => dataSet.filter(({ x }) => x >= xMin && x <= xMax))
+            .map(dataSet => dataSet
+                .filter(({ x }) => x >= minX && x <= maxX)
+                .map(({ x, y }) => ({ x, y: y > maxY ? maxY : y }))
+            )
         
         setGraphData(prevState => [...prevState, [...newData]])
     }

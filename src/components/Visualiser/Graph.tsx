@@ -5,7 +5,7 @@ import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
 
-import { getMinMaxOfDataSets } from '../../utils/minMax'
+import { getMinMaxOfDataSets, MinMax } from '../../utils/minMax'
 
 const useStyles = makeStyles({
     graphContainer: {
@@ -31,7 +31,7 @@ export type DataSet = DataPoint[]
 
 interface Props {
     dataSets: DataSet[]
-    onDataZoom: (xMin: number, xMax: number) => void
+    onDataZoom: (zoomData: Omit<MinMax, 'minY'>) => void
 }
 
 const width = 750
@@ -48,14 +48,18 @@ interface ZoomData {
     initialX: number
     dragX: number
     rectX: number
+    rectY: number
     width: number
+    height: number
 }
 
 const INIITIAL_ZOOM_RECT = {
     initialX: 0,
     dragX: 0,
     rectX: 0,
+    rectY: 0,
     width: 0,
+    height: 0,
 }
 
 const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
@@ -95,11 +99,43 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
         round: true,
     })
 
-    const eventXToGraphX = (x: number) => x - margin.left
+    const yScaleReverse = scaleLinear({
+        domain: [yGraphMax, 0],
+        range: [minY, maxY],
+        round: true,
+    })
+
+    const eventXToGraphX = (x: number, graphContainerOffset: number) => {
+        let graphX = x - margin.left - graphContainerOffset
+
+        if (graphX < 0) {
+            graphX = 0
+        }
+
+        if (graphX > xGraphMax) {
+            graphX = xGraphMax
+        }
+
+        return graphX
+    }
+
+    const eventYToGraphY = (y: number, graphContainerOffset: number) => {
+        let graphY = y - margin.top - graphContainerOffset
+
+        if (graphY < 0) {
+            graphY = 0
+        }
+
+        if (graphY > yGraphMax) {
+            graphY = yGraphMax
+        }
+
+        return graphY
+    }
 
     const changeZoomRect = () => {
         let width: number
-        const { dragX, initialX, rectX } = zoomData.current
+        const { dragX, initialX, rectX, rectY } = zoomData.current
 
         if (dragX < initialX) {
             width = initialX - rectX
@@ -107,8 +143,10 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
             width = dragX - initialX
         }
 
+        const height = yGraphMax - rectY
+
         zoomData.current = { ...zoomData.current, width }
-        setZoomRect({ ...zoomData.current, width })
+        setZoomRect({ ...zoomData.current, width, height })
     }
 
     const clearZoomRect = () => {
@@ -118,37 +156,36 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
         window.cancelAnimationFrame(requestRef.current as number)
     }
 
-    const handleGraphClick = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
+    const handleGraphClick = ({ clientX, clientY }: React.MouseEvent<HTMLDivElement>) => {
         if (!graphSVG.current) {
             return
         }
 
-        const { left } = graphSVG.current.getBoundingClientRect()
-        let graphX = eventXToGraphX(clientX - left)
-
-        if (graphX < 0) {
-            graphX = 0
-        }
-
-        if (graphX > xGraphMax) {
-            graphX = xGraphMax
-        }
+        const { left, top } = graphSVG.current.getBoundingClientRect()
+        let graphX = eventXToGraphX(clientX, left)
+        let graphY = eventYToGraphY(clientY, top)
     
         if (isZooming) {
-            onDataZoom(
-                xScaleReverse(zoomData.current.rectX) as number,
-                xScaleReverse(zoomData.current.rectX + zoomData.current.width) as number,
-            )
+            onDataZoom({
+                minX: xScaleReverse(zoomData.current.rectX) as number,
+                maxX: xScaleReverse(zoomData.current.rectX + zoomData.current.width) as number,
+                maxY: yScaleReverse(zoomData.current.rectY) as number,
+            })
             setIsZooming(false)
             clearZoomRect()
         } else {
-            zoomData.current = { ...zoomData.current, rectX: graphX, initialX: graphX }
+            zoomData.current = {
+                ...zoomData.current,
+                rectX: graphX,
+                rectY: graphY,
+                initialX: graphX,
+            }
 
             setIsZooming(true)
         }
     }
 
-    const handleZoomMove = ({ clientX }: React.MouseEvent<HTMLDivElement>) => {
+    const handleZoomMove = ({ clientX, clientY }: React.MouseEvent<HTMLDivElement>) => {
         if (!isZooming) {
             return
         }
@@ -157,21 +194,27 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
             return
         }
 
-        const { left } = graphSVG.current.getBoundingClientRect()
-        let graphX = eventXToGraphX(clientX - left)
-
-        if (graphX < 0) {
-            graphX = 0
-        }
-
-        if (graphX > xGraphMax) {
-            graphX = xGraphMax
-        }
+        const { left, top } = graphSVG.current.getBoundingClientRect()
+        let graphX = eventXToGraphX(clientX, left)
+        let graphY = eventYToGraphY(clientY, top)
         
         if (graphX < zoomData.current.initialX) {
-            zoomData.current = { ...zoomData.current, rectX: graphX, dragX: graphX }
+            zoomData.current = {
+                ...zoomData.current,
+                rectX: graphX,
+                dragX: graphX,
+            }
         } else {
-            zoomData.current = { ...zoomData.current, rectX: zoomData.current.initialX, dragX: graphX }
+            zoomData.current = {
+                ...zoomData.current,
+                rectX: zoomData.current.initialX,
+                dragX: graphX,
+            }
+        }
+
+        zoomData.current = {
+            ...zoomData.current,
+            rectY: graphY,
         }
 
         requestRef.current = requestAnimationFrame(changeZoomRect)
@@ -223,9 +266,9 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
                         isZooming && (
                             <rect
                                 x={zoomRect.rectX}
-                                y={0}
+                                y={zoomRect.rectY}
                                 width={zoomRect.width}
-                                height={yGraphMax}
+                                height={zoomRect.height}
                                 fill='blue'
                                 opacity={0.4}
                             />

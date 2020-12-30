@@ -1,6 +1,6 @@
 import { DataPoint } from '../components/Visualiser/Graph'
 
-interface MinMax {
+export interface MinMax {
     minX: number
     maxX: number
     minY: number
