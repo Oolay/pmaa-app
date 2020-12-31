@@ -6,6 +6,7 @@ import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
 
 import { getMinMaxOfDataSets, MinMax } from '../../utils/minMax'
+import { Pmaa } from '../../data/pmaaDetails'
 
 const useStyles = makeStyles({
     graphContainer: {
@@ -30,7 +31,7 @@ export interface DataPoint {
 export type DataSet = DataPoint[]
 
 interface Props {
-    dataSets: DataSet[]
+    dataSets: Pmaa[]
     onDataZoom: (zoomData: Omit<MinMax, 'minY'>) => void
 }
 
@@ -64,6 +65,7 @@ const INIITIAL_ZOOM_RECT = {
 
 const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     const classes = useStyles({})
+    const data = dataSets.map(dataSet => dataSet.data)
 
     const graphContainer = useRef<HTMLDivElement>(null)
 
@@ -79,7 +81,7 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     const yGraphMax = height - margin.top - 50
 
     // DataSets bounds
-    const { minX, maxX, minY, maxY } = getMinMaxOfDataSets(dataSets)
+    const { minX, maxX, minY, maxY } = getMinMaxOfDataSets(data)
 
     const xScale = scaleLinear({
         domain: [minX, maxX],
@@ -243,24 +245,28 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
                         stroke={'#1b1a1e'}
                     />
                     {
-                        dataSets.map((dataSet, setIndex) => dataSet.map(({ x, y }) => {
-                            const barX = xScale(x)
-                            const barY = yScale(y)
-                            const barWidth = 2
-                            const barHeight = yGraphMax - (yScale(y) as number)
+                        dataSets.map((dataSet, setIndex) => {
+                            const barColor = dataSet.color
+                            
+                            return dataSet.data.map(({ x, y }) => {
+                                const barX = xScale(x)
+                                const barY = yScale(y)
+                                const barWidth = 2
+                                const barHeight = yGraphMax - (yScale(y) as number)
 
-                            return (
-                                <Bar
-                                    key={`${setIndex}-${x}`}
-                                    x={barX}
-                                    y={barY}
-                                    width={barWidth}
-                                    height={barHeight}
-                                    opacity={0.4}
-                                    fill={setIndex === 0 ? 'black' : 'red'}
-                                />
-                            )
-                        }))
+                                return (
+                                    <Bar
+                                        key={`${setIndex}-${x}`}
+                                        x={barX}
+                                        y={barY}
+                                        width={barWidth}
+                                        height={barHeight}
+                                        opacity={0.6}
+                                        fill={barColor}
+                                    />
+                                )
+                            })}
+                        )
                     }
                     {
                         isZooming && (

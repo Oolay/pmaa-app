@@ -1,6 +1,7 @@
-import React from 'react';
+import React from 'react'
 
 import Visualiser from './components/Visualiser'
+
 
 function App() {
   return (

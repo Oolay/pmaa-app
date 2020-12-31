@@ -29,7 +29,7 @@ export function getMinMax(data: DataPoint[]): MinMax {
 }
 
 export function getMinMaxOfDataSets(dataSets: DataPoint[][]): MinMax {
-    const flatData = dataSets.reduce((flatDataSets, dataSet) => [...flatDataSets, ...dataSet])
+    const flatData = dataSets.reduce((flatDataSets, dataSet) => [...flatDataSets, ...dataSet], [])
 
     return getMinMax(flatData)
 }
