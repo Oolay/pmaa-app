@@ -8,7 +8,7 @@ import colors from '../../data/dataSetColors'
 
 import ActionButtons from './ActionButtons'
 import Graph, { DataSet } from './Graph'
-import PmaaList from './Grid'
+import PmaaList from './PmaaList'
 
 const useStyles = makeStyles({
     container: {
