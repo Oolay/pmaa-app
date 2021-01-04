@@ -1,5 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/styles'
+import Typography from '@material-ui/core/Typography'
 import IconButton from '@material-ui/core/IconButton'
 
 import RefreshIcon from '../icons/Refresh'
@@ -28,6 +29,9 @@ const ActionButtons:React.FC<Props> = ({
             <IconButton size='small' onClick={onDataZoomBack}>
                 <BackIcon />
             </IconButton>
+            <Typography>
+                Click and drag to zoom
+            </Typography>
             <IconButton size='small' onClick={onRefreshView}>
                 <RefreshIcon />
             </IconButton>

@@ -4,10 +4,9 @@ import { makeStyles } from '@material-ui/styles'
 import { MinMax } from '../../utils/minMax'
 
 import pmaaData, { Pmaa } from '../../data/pmaaDetails'
-import colors from '../../data/dataSetColors'
 
 import ActionButtons from './ActionButtons'
-import Graph, { DataSet } from './Graph'
+import Graph, { GRAPH_HEIGHT, GRAPH_WIDTH } from './Graph'
 import PmaaList from './PmaaList'
 
 const useStyles = makeStyles({
@@ -15,6 +14,13 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+    },
+    emptyTextContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: GRAPH_HEIGHT + 24, // add action icon height
+        width: GRAPH_WIDTH,
     }
 })
 
@@ -65,16 +71,33 @@ const Visualiser: React.FC = () => {
         }
     }
 
+    const showGraph = graphData.length > 0 && graphData.some(dataSets => dataSets.length > 0)
+
     return (
         <div className={classes.container}>
-            <ActionButtons
-                onDataZoomBack={onDataZoomBack}
-                onRefreshView={onRefreshView}
-            />
-            <Graph
-                dataSets={getLatestZoomData(graphData)}
-                onDataZoom={onDataZoom}
-            />
+            {
+                showGraph && (
+                    <ActionButtons
+                        onDataZoomBack={onDataZoomBack}
+                        onRefreshView={onRefreshView}
+                    />
+                )
+            }
+            {
+                showGraph && (
+                    <Graph
+                        dataSets={getLatestZoomData(graphData)}
+                        onDataZoom={onDataZoom}
+                    />
+                )
+            }
+            {
+                !showGraph && (
+                    <div className={classes.emptyTextContainer}>
+                        Click any number of PMAAs to see their electron-impact mass spectrum (EI-MS)
+                    </div>
+                )
+            }
             <PmaaList
                 pmaas={pmaaData}
                 selectedPmaas={selectedPmaas}

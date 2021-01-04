@@ -35,8 +35,8 @@ interface Props {
     onDataZoom: (zoomData: Omit<MinMax, 'minY'>) => void
 }
 
-const width = 750
-const height = 300
+export const GRAPH_WIDTH = 750
+export const GRAPH_HEIGHT = 300
 
 const margin = {
     top: 30,
@@ -77,8 +77,8 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     const requestRef = useRef<number>()
 
     // Graph bounds
-    const xGraphMax = width - margin.left - 50
-    const yGraphMax = height - margin.top - 50
+    const xGraphMax = GRAPH_WIDTH - margin.left - 50
+    const yGraphMax = GRAPH_HEIGHT - margin.top - 50
 
     // DataSets bounds
     const { minX, maxX, minY, maxY } = getMinMaxOfDataSets(data)
@@ -229,7 +229,7 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
             onClick={handleGraphClick}
             onMouseMove={handleZoomMove}
         >
-            <svg ref={graphSVG} height={height} width={width}>
+            <svg ref={graphSVG} height={GRAPH_HEIGHT} width={GRAPH_WIDTH}>
                 <Group top={margin.top} left={margin.left}>
                     <AxisLeft
                         scale={yScale}

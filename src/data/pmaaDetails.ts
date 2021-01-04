@@ -2,6 +2,8 @@ import getMockData from './getMockData'
 import { DataPoint } from '../components/Visualiser/Graph'
 import getRandomHexColor from '../utils/getRandomColor'
 
+export type PmaaGroup = 'all' | 'nonBranchedHexopyranosyl'
+
 export interface Pmaa {
     id: number
     name: string

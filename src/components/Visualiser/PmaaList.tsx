@@ -1,11 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import classnames from 'classnames'
 import { makeStyles } from '@material-ui/styles'
 import GridList from '@material-ui/core/GridList'
 import GridListTile from '@material-ui/core/GridListTile'
 import Card from '@material-ui/core/Card'
+import Select from '@material-ui/core/Select'
+import InputLabel from '@material-ui/core/InputLabel'
+import MenuItem from '@material-ui/core/MenuItem'
+import FormControl from '@material-ui/core/FormControl'
 
-import { Pmaa } from '../../data/pmaaDetails'
+import { Pmaa, PmaaGroup } from '../../data/pmaaDetails'
 
 const useStyles = makeStyles({
     container: {
@@ -32,15 +36,38 @@ interface Props {
     onPmaaClick: (id: number) => () => void
 }
 
-const PmaaGrid: React.FC<Props> = ({ pmaas, selectedPmaas, onPmaaClick }) => {
+const PmaaList: React.FC<Props> = ({ pmaas, selectedPmaas, onPmaaClick }) => {
     const classes = useStyles({})
+    const [displayedPmaas, setDisplayedPmaas] = useState<Pmaa[]>(pmaas)
+    const [pmaaGroupFilter, setPmaaGroupFilter] = useState<any>('all')
 
     const isPmaaSelected = (id: number) => selectedPmaas.some(selectedId => selectedId === id)
 
+    const handlePmaaGroupChange = ({ target: { value } }: React.ChangeEvent<any>) => {
+        setPmaaGroupFilter(value)
+
+        if (value === 'all') {
+            setDisplayedPmaas(pmaas)
+        } else {
+            setDisplayedPmaas(prevPmaas => prevPmaas.filter(({ group }) => group === value))
+        }
+    }
+
     return (
         <div className={classes.container}>
+            <FormControl>
+                <InputLabel>
+                    <Select
+                        value={pmaaGroupFilter}
+                        onChange={handlePmaaGroupChange}
+                    >
+                        <MenuItem value={'all'}>all</MenuItem>
+                        <MenuItem value={'nonBranchedHexopyranosyl'}>non-branched Hexopyranosyl</MenuItem>
+                    </Select>
+                </InputLabel>
+            </FormControl>
             <GridList cols={8} cellHeight={30}>
-                {pmaas.map(({ id, name, linkage, color}) => {
+                {displayedPmaas.map(({ id, name, linkage, color}) => {
                     return (
                         <GridListTile
                             key={id}
@@ -63,4 +90,4 @@ const PmaaGrid: React.FC<Props> = ({ pmaas, selectedPmaas, onPmaaClick }) => {
     )
 }
 
-export default PmaaGrid
+export default PmaaList
