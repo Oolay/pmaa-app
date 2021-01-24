@@ -6,6 +6,8 @@ import IconButton from '@material-ui/core/IconButton'
 import RefreshIcon from '../icons/Refresh'
 import BackIcon from '../icons/Back'
 
+export const ACTION_BUTTONS_HEIGHT = 24
+
 const useStyles = makeStyles({
     container: {
         display: 'flex',

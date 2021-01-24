@@ -9,26 +9,29 @@ import { Typography } from '@material-ui/core'
 
 const useStyles = makeStyles({
     container: {
-        width: '75%',
+        padding: '10px',
     },
     gridHeader: {
-        paddingBottom: '5px',
+        paddingTop: '10px',
+        paddingBottom: '10px',
     },
-    columnItem: {
+    columnTitleItem: {
         display: 'flex',
         justifyContent: 'center',
+        width: '80px'
     },
-    rowItem: {
+    rowtitleItem: {
         display: 'flex',
         justifyContent: 'center',
+        width: '80px'
+
     },
-    item: {
-        display: 'flex',
-        justifyContent: 'center',
+    contentItem: {
         borderRadius: '6px',
         border: '1px solid #d3d3d3',
         margin: '2px',
         padding: '1px',
+        width: '80px',
         "&:hover": {
             backgroundColor: '#d3d3d3',
         },
@@ -53,52 +56,52 @@ const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, on
     const isPmaaSelected = (id: string) => selectedPmaas.some(selectedId => selectedId === id)
 
     const getHeader = () => (
-        <>
-            <Grid item xs={1}>
-                <div/>
-            </Grid>
+        <tr>
+            <th>
+                <div className={classes.columnTitleItem}>
+                    Linkage
+                </div>
+            </th>
             {columns.map(col => (
-                <Grid item xs={1}>
-                    <div className={classes.columnItem}>
+                <th>
+                    <div className={classes.columnTitleItem}>
                         <Typography noWrap>
                             {col}
                         </Typography>
                     </div>
-                </Grid>
+                </th>
             ))}
-        </>
+        </tr>
     )
 
     const getRow = (pmaas: Pmaa[]) =>  (
-        <>
+        <tr>
             {
-                <Grid xs={1}>
-                    <div className={classes.rowItem}>
-                        <Typography noWrap>
-                            {pmaas[0].linkage}
-                        </Typography>
+                <td>
+                    <div className={classes.rowtitleItem}>
+                        {pmaas[0].linkage}
                     </div>
-                </Grid>
+                </td>
             }
             {
                 pmaas.map((pmaa) => {
                     const id = `${pmaaGroup.groupName}:${pmaa.name}:${pmaa.linkage}`
 
                     return (
-                        <Grid item xs={1}>
+                        <td>
                             <div
-                                className={classes.item}
+                                className={classes.contentItem}
                                 style={isPmaaSelected(id) ? {backgroundColor: `${pmaa.color}`} : {}}
                                 onClick={onPmaaClick(id)}
                             >
                                 &nbsp;
                             </div>
-                        </Grid>
+                        </td>
                         )
                     }
                 )
             }
-        </>
+        </tr>
     )
     
 
@@ -106,21 +109,17 @@ const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, on
         <div className={classes.container}>
             <div className={classes.gridHeader}>
                 <Typography variant='subtitle1'>
-                    {pmaaGroup.groupName}
+                    <b>{pmaaGroup.groupName}</b>
                 </Typography>
             </div>
-            <Grid container>
+            <table>
                 {getHeader()}
                 {rows.map(row => {
                     const items = pmaaGroup.items.filter(item => item.linkage === row)
 
-                    return (
-                        <Grid container>
-                            {getRow(items)}
-                        </Grid>
-                    )
+                    return getRow(items)
                 })}
-            </Grid>
+            </table>
         </div>
     )
 }

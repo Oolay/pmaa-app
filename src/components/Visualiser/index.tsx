@@ -5,7 +5,7 @@ import { MinMax } from '../../utils/minMax'
 
 import { pmaaData, Pmaa } from '../../data/pmaaDetails'
 
-import ActionButtons from './ActionButtons'
+import ActionButtons, { ACTION_BUTTONS_HEIGHT } from './ActionButtons'
 import Graph, { GRAPH_HEIGHT, GRAPH_WIDTH } from './Graph'
 import PmaaGrid from './PmaaGrid'
 
@@ -14,12 +14,21 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        height: '100%',
+        padding: '5px',
+    },
+    gridContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: `calc(100% - ${GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT}px)`,
+        overflowY: 'scroll',
     },
     emptyTextContainer: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: GRAPH_HEIGHT + 24, // add action icon height
+        border: '0.5px dashed grey',
+        height: GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT,
         width: GRAPH_WIDTH,
     }
 })
@@ -120,13 +129,27 @@ const Visualiser: React.FC = () => {
                     </div>
                 )
             }
-            <PmaaGrid
-                pmaaGroup={pmaaData[0]}
-                columns={['Galp', 'Glcp', 'Manp', 'Fucp', 'Rhap', 'GalpNAc', 'GlcpNAc', 'ManpNAc']}
-                rows={['T', '2', '3', '4', '6']}
-                selectedPmaas={selectedPmaas}
-                onPmaaClick={onItemClick}
-            />
+            {
+                <div className={classes.gridContainer}>
+                    {
+                        pmaaData.map(groupData => {
+        
+                            const columns = new Set(groupData.items.map(item => item.name))
+                            const rows = new Set(groupData.items.map(item => item.linkage))
+        
+                            return (
+                                <PmaaGrid
+                                    pmaaGroup={groupData}
+                                    columns={Array.from(columns)}
+                                    rows={Array.from(rows)}
+                                    selectedPmaas={selectedPmaas}
+                                    onPmaaClick={onItemClick}
+                                />
+                            )
+                        })
+                    }
+                </div>
+            }
         </div>
     )
 }
