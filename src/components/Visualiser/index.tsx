@@ -3,11 +3,11 @@ import { makeStyles } from '@material-ui/styles'
 
 import { MinMax } from '../../utils/minMax'
 
-import pmaaData, { Pmaa } from '../../data/pmaaDetails'
+import { pmaaData, Pmaa } from '../../data/pmaaDetails'
 
 import ActionButtons from './ActionButtons'
 import Graph, { GRAPH_HEIGHT, GRAPH_WIDTH } from './Graph'
-import PmaaList from './PmaaList'
+import PmaaGrid from './PmaaGrid'
 
 const useStyles = makeStyles({
     container: {
@@ -29,11 +29,11 @@ type DataSetZoomHistory = Pmaa[]
 const Visualiser: React.FC = () => {
     const classes = useStyles({})
     const [graphData, setGraphData] = useState<DataSetZoomHistory[]>([])
-    const [selectedPmaas, setSelectedPmaas] = useState<number[]>([])
+    const [selectedPmaas, setSelectedPmaas] = useState<string[]>([])
 
-    const isPmaaSelected = (id: number) => selectedPmaas.some(selectedId => selectedId === id)
+    const isPmaaSelected = (id: string) => selectedPmaas.some(selectedId => selectedId === id)
   
-    const onCardClick = (id: number) => () => {
+    const onItemClick = (id: string) => () => {
         if (isPmaaSelected(id)) {
             setSelectedPmaas(prevSelected => prevSelected.filter(selectedId => selectedId !== id))
         } else {
@@ -41,8 +41,30 @@ const Visualiser: React.FC = () => {
         }
     }
 
+    const getGraphData = (pmaaId: string) => {
+        const [group, name, linkage] = pmaaId.split(':')
+
+        const data = pmaaData
+            .find(groupData => groupData.groupName === group)
+            ?.items
+            .find(groupItem => groupItem.name === name && groupItem.linkage === linkage)
+
+        return data
+    }
+
     useEffect(() => {
-        setGraphData([pmaaData.filter(data => selectedPmaas.some(id => id === data.id))])
+        const dataSets = selectedPmaas
+            .reduce((dataSets, selectedPmaaId) => {
+                const graphData = getGraphData(selectedPmaaId)
+
+                if (graphData) {
+                    return [...dataSets, graphData]
+                }
+
+                return dataSets
+            }, [] as Pmaa[])
+
+        setGraphData([dataSets])
     }, [selectedPmaas])
     
     const getLatestZoomData = (graphData: DataSetZoomHistory[]) => graphData[graphData.length - 1] || []
@@ -98,10 +120,12 @@ const Visualiser: React.FC = () => {
                     </div>
                 )
             }
-            <PmaaList
-                pmaas={pmaaData}
+            <PmaaGrid
+                pmaaGroup={pmaaData[0]}
+                columns={['Galp', 'Glcp', 'Manp', 'Fucp', 'Rhap', 'GalpNAc', 'GlcpNAc', 'ManpNAc']}
+                rows={['T', '2', '3', '4', '6']}
                 selectedPmaas={selectedPmaas}
-                onPmaaClick={onCardClick}
+                onPmaaClick={onItemClick}
             />
         </div>
     )
