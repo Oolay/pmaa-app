@@ -38,7 +38,7 @@ interface Props {
 export const GRAPH_WIDTH = 750
 export const GRAPH_HEIGHT = 300
 
-const margin = {
+export const GRAPH_MARGIN = {
     top: 30,
     bottom: 60,
     left: 80,
@@ -77,8 +77,8 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     const requestRef = useRef<number>()
 
     // Graph bounds
-    const xGraphMax = GRAPH_WIDTH - margin.left - 50
-    const yGraphMax = GRAPH_HEIGHT - margin.top - 50
+    const xGraphMax = GRAPH_WIDTH - GRAPH_MARGIN.left - 50
+    const yGraphMax = GRAPH_HEIGHT - GRAPH_MARGIN.top - 50
 
     // DataSets bounds
     const { minX, maxX, minY, maxY } = getMinMaxOfDataSets(data)
@@ -108,7 +108,7 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     })
 
     const eventXToGraphX = (x: number, graphContainerOffset: number) => {
-        let graphX = x - margin.left - graphContainerOffset
+        let graphX = x - GRAPH_MARGIN.left - graphContainerOffset
 
         if (graphX < 0) {
             graphX = 0
@@ -122,7 +122,7 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     }
 
     const eventYToGraphY = (y: number, graphContainerOffset: number) => {
-        let graphY = y - margin.top - graphContainerOffset
+        let graphY = y - GRAPH_MARGIN.top - graphContainerOffset
 
         if (graphY < 0) {
             graphY = 0
@@ -230,18 +230,16 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
             onMouseMove={handleZoomMove}
         >
             <svg ref={graphSVG} height={GRAPH_HEIGHT} width={GRAPH_WIDTH}>
-                <Group top={margin.top} left={margin.left}>
+                <Group top={GRAPH_MARGIN.top} left={GRAPH_MARGIN.left}>
                     <AxisLeft
                         scale={yScale}
                         top={0}
                         left={0}
-                        label={'y label'}
                         stroke={'#1b1a1e'}
                     />
                     <AxisBottom
                         scale={xScale}
                         top={yGraphMax}
-                        label={'x label'}
                         stroke={'#1b1a1e'}
                     />
                     {

@@ -6,7 +6,7 @@ import { MinMax } from '../../utils/minMax'
 import { pmaaData, Pmaa } from '../../data/pmaaDetails'
 
 import ActionButtons, { ACTION_BUTTONS_HEIGHT } from './ActionButtons'
-import Graph, { GRAPH_HEIGHT, GRAPH_WIDTH } from './Graph'
+import Graph, { GRAPH_HEIGHT, GRAPH_WIDTH, GRAPH_MARGIN } from './Graph'
 import PmaaGrid from './PmaaGrid'
 
 const useStyles = makeStyles({
@@ -15,21 +15,29 @@ const useStyles = makeStyles({
         flexDirection: 'column',
         alignItems: 'center',
         height: '100%',
-        padding: '5px',
+        padding: '10px',
+    },
+    graphContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        height: GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT + GRAPH_MARGIN.top + GRAPH_MARGIN.bottom,
+        width: GRAPH_WIDTH + GRAPH_MARGIN.left + GRAPH_MARGIN.right,
     },
     gridContainer: {
         display: 'flex',
         flexDirection: 'column',
         height: `calc(100% - ${GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT}px)`,
         overflowY: 'scroll',
+        marginTop: '16px',
     },
     emptyTextContainer: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         border: '0.5px dashed grey',
-        height: GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT,
-        width: GRAPH_WIDTH,
+        padding: '16px',
+        flex: 1,
     }
 })
 
@@ -102,54 +110,54 @@ const Visualiser: React.FC = () => {
         }
     }
 
+    const onDataClear = () => {
+        setSelectedPmaas([])
+    }
+
     const showGraph = graphData.length > 0 && graphData.some(dataSets => dataSets.length > 0)
 
     return (
         <div className={classes.container}>
-            {
-                showGraph && (
-                    <ActionButtons
-                        onDataZoomBack={onDataZoomBack}
-                        onRefreshView={onRefreshView}
-                    />
-                )
-            }
-            {
-                showGraph && (
-                    <Graph
-                        dataSets={getLatestZoomData(graphData)}
-                        onDataZoom={onDataZoom}
-                    />
-                )
-            }
-            {
-                !showGraph && (
-                    <div className={classes.emptyTextContainer}>
-                        Click any number of PMAAs to see their electron-impact mass spectrum (EI-MS)
-                    </div>
-                )
-            }
-            {
-                <div className={classes.gridContainer}>
-                    {
-                        pmaaData.map(groupData => {
-        
-                            const columns = new Set(groupData.items.map(item => item.name))
-                            const rows = new Set(groupData.items.map(item => item.linkage))
-        
-                            return (
-                                <PmaaGrid
-                                    pmaaGroup={groupData}
-                                    columns={Array.from(columns)}
-                                    rows={Array.from(rows)}
-                                    selectedPmaas={selectedPmaas}
-                                    onPmaaClick={onItemClick}
-                                />
-                            )
-                        })
-                    }
-                </div>
-            }
+            <div className={classes.graphContainer}>
+                {
+                    showGraph ? (
+                        <>
+                            <ActionButtons
+                                onDataZoomBack={onDataZoomBack}
+                                onRefreshView={onRefreshView}
+                                onClearView={onDataClear}
+                            />
+                           <Graph
+                                dataSets={getLatestZoomData(graphData)}
+                                onDataZoom={onDataZoom}
+                            />
+                        </>
+                    ) : (
+                        <div className={classes.emptyTextContainer}>
+                            Click any number of PMAAs to see their electron-impact mass spectrum (EI-MS)
+                        </div>
+                    )
+                }
+            </div>
+            <div className={classes.gridContainer}>
+                {
+                    pmaaData.map(groupData => {
+    
+                        const columns = new Set(groupData.items.map(item => item.name))
+                        const rows = new Set(groupData.items.map(item => item.linkage))
+    
+                        return (
+                            <PmaaGrid
+                                pmaaGroup={groupData}
+                                columns={Array.from(columns)}
+                                rows={Array.from(rows)}
+                                selectedPmaas={selectedPmaas}
+                                onPmaaClick={onItemClick}
+                            />
+                        )
+                    })
+                }
+            </div>
         </div>
     )
 }
