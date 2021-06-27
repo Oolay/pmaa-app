@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/styles'
 
-import {isSamePmaa, replacePmaa, MinMax, getRandomHexColor } from '../../utils'
+import {isSamePmaa, replacePmaa, MinMax, getRandomHexColor, getStatusTextColor } from '../../utils'
 
 import { pmaaData, Pmaa } from '../../data/pmaaDetails'
 
@@ -9,25 +9,27 @@ import ActionButtons, { ACTION_BUTTONS_HEIGHT } from './ActionButtons'
 import Graph, { GRAPH_HEIGHT, GRAPH_WIDTH, GRAPH_MARGIN } from './Graph'
 import PmaaGrid from './PmaaGrid'
 
+const GRAPH_CONTAINER_HEIGHT =  GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT + GRAPH_MARGIN.top + GRAPH_MARGIN.bottom
+
 const useStyles = makeStyles({
     container: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        height: '100%',
-        padding: '10px',
+        height: '100vh',
     },
     graphContainer: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        height: GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT + GRAPH_MARGIN.top + GRAPH_MARGIN.bottom,
+        marginTop: '10px',
+        height: GRAPH_CONTAINER_HEIGHT,
         width: GRAPH_WIDTH + GRAPH_MARGIN.left + GRAPH_MARGIN.right,
     },
     gridContainer: {
         display: 'flex',
         flexDirection: 'column',
-        height: `calc(100% - ${GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT}px)`,
+        height: `calc(100% - ${GRAPH_CONTAINER_HEIGHT}px)`,
         overflowY: 'scroll',
         marginTop: '16px',
     },
@@ -40,11 +42,13 @@ const useStyles = makeStyles({
         flex: 1,
     },
     legendContainer: {
-        display: 'flex',
         textAlign: 'center',
-        fontSize: '12px'
+        fontSize: '12px',
+        overflowy: 'scroll',
+        flex: 1,
     },
     legendItem: {
+        display: 'inline-block',
         borderRadius: '6px',
         border: '1px solid #d3d3d3',
         margin: '2px',
@@ -155,7 +159,10 @@ const Visualiser: React.FC = () => {
                                         <div
                                             key={`${pmaa.linkage}-${pmaa.name}`}
                                             className={classes.legendItem}
-                                            style={{backgroundColor: `${pmaa.color}`}}
+                                            style={{
+                                                backgroundColor: `${pmaa.color}`,
+                                                color: getStatusTextColor(pmaa.color)
+                                            }}
                                             onClick={handlePmaaColorChange(pmaa)}
                                         >
                                             {`${pmaa.linkage}-${pmaa.name}`}

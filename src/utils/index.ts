@@ -18,6 +18,30 @@ export function getRandomHexColor(): string {
 
     return "#" + randomColor
 }
+
+const PRIMARY_TEXT_COLOR = '#434343'
+const WHITE_TEXT_COLOR = '#FFFFFF'
+
+
+function isHexColor(color : string) {
+    return /^#([A-Fa-f0-9]{6}$)/.test(color)
+}
+
+export function getStatusTextColor(backgroundHexColor : string) {
+    // default to black if invalid colour used
+    if (!isHexColor(backgroundHexColor)) {
+        return PRIMARY_TEXT_COLOR
+    }
+
+    const red = parseInt(backgroundHexColor.substr(1, 2), 16)
+    const green = parseInt(backgroundHexColor.substr(3, 2), 16)
+    const blue = parseInt(backgroundHexColor.substr(5, 2), 16)
+
+    // convert rgb colour to YIQ color space - see https://24ways.org/2010/calculating-color-contrast
+    const yiq = ((red * 299) + (green * 587) + (blue * 114)) / 1000
+
+    return yiq >= 128 ? PRIMARY_TEXT_COLOR : WHITE_TEXT_COLOR
+}
 export interface MinMax {
     minX: number
     maxX: number
