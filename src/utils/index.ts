@@ -1,6 +1,9 @@
 import { DataPoint } from '../components/Visualiser/Graph'
 import { Pmaa } from '../data/pmaaDetails'
 
+const PRIMARY_TEXT_COLOR = '#434343'
+const WHITE_TEXT_COLOR = '#FFFFFF'
+
 export const replacePmaa = (pmaas: Pmaa[], newPmaa: Pmaa) => (
     pmaas.map(
         pmaa => newPmaa.name === pmaa.name && newPmaa.linkage === pmaa.linkage
@@ -18,10 +21,6 @@ export function getRandomHexColor(): string {
 
     return "#" + randomColor
 }
-
-const PRIMARY_TEXT_COLOR = '#434343'
-const WHITE_TEXT_COLOR = '#FFFFFF'
-
 
 function isHexColor(color : string) {
     return /^#([A-Fa-f0-9]{6}$)/.test(color)
