@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/styles'
 
-import { MinMax } from '../../utils/minMax'
+import {isSamePmaa, replacePmaa, MinMax, getRandomHexColor } from '../../utils'
 
 import { pmaaData, Pmaa } from '../../data/pmaaDetails'
 
@@ -38,7 +38,22 @@ const useStyles = makeStyles({
         border: '0.5px dashed grey',
         padding: '16px',
         flex: 1,
-    }
+    },
+    legendContainer: {
+        display: 'flex',
+        textAlign: 'center',
+        fontSize: '12px'
+    },
+    legendItem: {
+        borderRadius: '6px',
+        border: '1px solid #d3d3d3',
+        margin: '2px',
+        padding: '1px',
+        width: '80px',
+        "&:hover": {
+            backgroundColor: '#d3d3d3',
+        },
+    },
 })
 
 type DataSetZoomHistory = Pmaa[]
@@ -46,47 +61,30 @@ type DataSetZoomHistory = Pmaa[]
 const Visualiser: React.FC = () => {
     const classes = useStyles({})
     const [graphData, setGraphData] = useState<DataSetZoomHistory[]>([])
-    const [selectedPmaas, setSelectedPmaas] = useState<string[]>([])
+    const [selectedPmaas, setSelectedPmaas] = useState<Pmaa[]>([])
+    const [rawPmaaData, setRawPmaaData] = useState(pmaaData)
 
-    const isPmaaSelected = (id: string) => selectedPmaas.some(selectedId => selectedId === id)
-  
-    const onItemClick = (id: string) => () => {
-        if (isPmaaSelected(id)) {
-            setSelectedPmaas(prevSelected => prevSelected.filter(selectedId => selectedId !== id))
+    const isPmaaSelected = (selectedPmaa: Pmaa) => (
+        selectedPmaas.some(pmaa => isSamePmaa(selectedPmaa, pmaa))
+    )
+ 
+    const handleItemClick = (selectedPmaa: Pmaa) => () => {
+        if (isPmaaSelected(selectedPmaa)) {
+            setSelectedPmaas((prevSelected) => (
+                prevSelected.filter(pmaa => !isSamePmaa(selectedPmaa, pmaa))
+            ))
         } else {
-            setSelectedPmaas(prevSelected => [...prevSelected, id])
+            setSelectedPmaas(prevSelected => [...prevSelected, selectedPmaa])
         }
     }
 
-    const getGraphData = (pmaaId: string) => {
-        const [group, name, linkage] = pmaaId.split(':')
-
-        const data = pmaaData
-            .find(groupData => groupData.groupName === group)
-            ?.items
-            .find(groupItem => groupItem.name === name && groupItem.linkage === linkage)
-
-        return data
-    }
-
     useEffect(() => {
-        const dataSets = selectedPmaas
-            .reduce((dataSets, selectedPmaaId) => {
-                const graphData = getGraphData(selectedPmaaId)
-
-                if (graphData) {
-                    return [...dataSets, graphData]
-                }
-
-                return dataSets
-            }, [] as Pmaa[])
-
-        setGraphData([dataSets])
+        setGraphData([selectedPmaas])
     }, [selectedPmaas])
     
     const getLatestZoomData = (graphData: DataSetZoomHistory[]) => graphData[graphData.length - 1] || []
 
-    const onDataZoom = ({ minX, maxX, maxY }: Omit<MinMax, 'minY'>) => {
+    const handleDataZoom = ({ minX, maxX, maxY }: Omit<MinMax, 'minY'>) => {
         const latestData = getLatestZoomData(graphData)
         const newData = latestData
             .map(pmaa => ({
@@ -100,17 +98,37 @@ const Visualiser: React.FC = () => {
         setGraphData(prevState => [...prevState, [...newData]])
     }
 
-    const onRefreshView = () => {
+    const handlePmaaColorChange = (pmaa: Pmaa) => () => {
+        const newPmaa = {
+            ...pmaa,
+            color: getRandomHexColor()
+        }
+
+        setSelectedPmaas(prevSelected => replacePmaa(prevSelected, newPmaa))
+
+        setRawPmaaData(prevRawData => prevRawData.map(group => {
+            if (group.groupName === newPmaa.groupName) {
+                return {
+                    ...group,
+                    items: replacePmaa(group.items, newPmaa)
+                }
+            }
+
+            return group
+        }))
+    }
+
+    const handleRefreshView = () => {
         setGraphData(prevState => prevState.slice(0, 1))
     }
 
-    const onDataZoomBack = () => {
+    const handleDataZoomBack = () => {
         if (graphData.length > 1) {
             setGraphData(prevState => prevState.slice(0, prevState.length - 1))
         }
     }
 
-    const onDataClear = () => {
+    const handleDataClear = () => {
         setSelectedPmaas([])
     }
 
@@ -123,14 +141,28 @@ const Visualiser: React.FC = () => {
                     showGraph ? (
                         <>
                             <ActionButtons
-                                onDataZoomBack={onDataZoomBack}
-                                onRefreshView={onRefreshView}
-                                onClearView={onDataClear}
+                                onDataZoomBack={handleDataZoomBack}
+                                onRefreshView={handleRefreshView}
+                                onClearView={handleDataClear}
                             />
                            <Graph
                                 dataSets={getLatestZoomData(graphData)}
-                                onDataZoom={onDataZoom}
+                                onDataZoom={handleDataZoom}
                             />
+                            <div className={classes.legendContainer}>
+                                {selectedPmaas.map(pmaa => {
+                                    return (
+                                        <div
+                                            key={`${pmaa.linkage}-${pmaa.name}`}
+                                            className={classes.legendItem}
+                                            style={{backgroundColor: `${pmaa.color}`}}
+                                            onClick={handlePmaaColorChange(pmaa)}
+                                        >
+                                            {`${pmaa.linkage}-${pmaa.name}`}
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </>
                     ) : (
                         <div className={classes.emptyTextContainer}>
@@ -141,18 +173,19 @@ const Visualiser: React.FC = () => {
             </div>
             <div className={classes.gridContainer}>
                 {
-                    pmaaData.map(groupData => {
+                    rawPmaaData.map(groupData => {
     
                         const columns = new Set(groupData.items.map(item => item.name))
                         const rows = new Set(groupData.items.map(item => item.linkage))
     
                         return (
                             <PmaaGrid
+                                key={groupData.groupName}
                                 pmaaGroup={groupData}
                                 columns={Array.from(columns)}
                                 rows={Array.from(rows)}
                                 selectedPmaas={selectedPmaas}
-                                onPmaaClick={onItemClick}
+                                onPmaaClick={handleItemClick}
                             />
                         )
                     })

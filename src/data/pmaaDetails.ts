@@ -1,8 +1,9 @@
 import getMockData from './getMockData'
 import { DataPoint } from '../components/Visualiser/Graph'
-import getRandomHexColor from '../utils/getRandomColor'
+import { getRandomHexColor } from '../utils'
 
 export interface Pmaa {
+    groupName: string
     name: string
     linkage: string
     data: DataPoint[]
@@ -223,5 +224,5 @@ const pmaas = [
 
 export const pmaaData = pmaas.map((group) => ({
     ...group,
-    items: group.items.map(item => addDataSetAndColor(item)) as Pmaa[]
+    items: group.items.map(item => ({ ...addDataSetAndColor(item), groupName: group.groupName }))
 }))

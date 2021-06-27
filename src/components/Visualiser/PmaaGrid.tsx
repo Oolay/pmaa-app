@@ -1,11 +1,10 @@
-import React, { useState } from 'react'
-import classnames from 'classnames'
+import React from 'react'
 import { makeStyles } from '@material-ui/styles'
-import Grid from '@material-ui/core/Grid'
-import Paper from '@material-ui/core/Paper'
+
 
 import { Pmaa } from '../../data/pmaaDetails'
 import { Typography } from '@material-ui/core'
+import { isSamePmaa } from '../../utils'
 
 const useStyles = makeStyles({
     container: {
@@ -47,13 +46,13 @@ interface Props {
     pmaaGroup: PmaaGroup
     columns: string[]
     rows: string[]
-    selectedPmaas: string[]
-    onPmaaClick: (id: string) => () => void
+    selectedPmaas: Pmaa[]
+    onPmaaClick: (pmaa: Pmaa) => () => void
 }
 
 const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, onPmaaClick }) => {
     const classes = useStyles({})
-    const isPmaaSelected = (id: string) => selectedPmaas.some(selectedId => selectedId === id)
+    const isPmaaSelected = (selectedPmaa: Pmaa) => selectedPmaas.some(pmaa => isSamePmaa(selectedPmaa,pmaa))
 
     const getHeader = () => (
         <tr>
@@ -63,7 +62,7 @@ const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, on
                 </div>
             </th>
             {columns.map(col => (
-                <th>
+                <th key={col}>
                     <div className={classes.columnTitleItem}>
                         <Typography noWrap>
                             {col}
@@ -85,14 +84,12 @@ const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, on
             }
             {
                 pmaas.map((pmaa) => {
-                    const id = `${pmaaGroup.groupName}:${pmaa.name}:${pmaa.linkage}`
-
                     return (
-                        <td>
+                        <td key={`${pmaa.linkage}-${pmaa.name}`}>
                             <div
                                 className={classes.contentItem}
-                                style={isPmaaSelected(id) ? {backgroundColor: `${pmaa.color}`} : {}}
-                                onClick={onPmaaClick(id)}
+                                style={isPmaaSelected(pmaa) ? {backgroundColor: `${pmaa.color}`} : {}}
+                                onClick={onPmaaClick(pmaa)}
                             >
                                 &nbsp;
                             </div>

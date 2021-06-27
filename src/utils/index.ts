@@ -1,5 +1,23 @@
 import { DataPoint } from '../components/Visualiser/Graph'
+import { Pmaa } from '../data/pmaaDetails'
 
+export const replacePmaa = (pmaas: Pmaa[], newPmaa: Pmaa) => (
+    pmaas.map(
+        pmaa => newPmaa.name === pmaa.name && newPmaa.linkage === pmaa.linkage
+            ? newPmaa
+            : pmaa
+        )
+)
+
+export const isSamePmaa = (pmaa1: Pmaa, pmaa2: Pmaa) => (
+    pmaa1.name === pmaa2.name && pmaa1.linkage === pmaa2.linkage
+)
+
+export function getRandomHexColor(): string {
+    const randomColor = Math.floor(Math.random()*16777215).toString(16)
+
+    return "#" + randomColor
+}
 export interface MinMax {
     minX: number
     maxX: number

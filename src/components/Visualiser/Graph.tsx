@@ -5,7 +5,7 @@ import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
 
-import { getMinMaxOfDataSets, MinMax } from '../../utils/minMax'
+import { getMinMaxOfDataSets, MinMax } from '../../utils'
 import { Pmaa } from '../../data/pmaaDetails'
 
 const useStyles = makeStyles({
