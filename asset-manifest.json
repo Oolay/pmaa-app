@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/pmaa-app/static/css/main.6dea0f05.chunk.css",
-    "main.js": "/pmaa-app/static/js/main.cf5431e0.chunk.js",
-    "main.js.map": "/pmaa-app/static/js/main.cf5431e0.chunk.js.map",
+    "main.js": "/pmaa-app/static/js/main.eb093793.chunk.js",
+    "main.js.map": "/pmaa-app/static/js/main.eb093793.chunk.js.map",
     "runtime-main.js": "/pmaa-app/static/js/runtime-main.76e408f5.js",
     "runtime-main.js.map": "/pmaa-app/static/js/runtime-main.76e408f5.js.map",
-    "static/js/2.35c47730.chunk.js": "/pmaa-app/static/js/2.35c47730.chunk.js",
-    "static/js/2.35c47730.chunk.js.map": "/pmaa-app/static/js/2.35c47730.chunk.js.map",
+    "static/js/2.5d7eda00.chunk.js": "/pmaa-app/static/js/2.5d7eda00.chunk.js",
+    "static/js/2.5d7eda00.chunk.js.map": "/pmaa-app/static/js/2.5d7eda00.chunk.js.map",
     "static/js/3.363c97db.chunk.js": "/pmaa-app/static/js/3.363c97db.chunk.js",
     "static/js/3.363c97db.chunk.js.map": "/pmaa-app/static/js/3.363c97db.chunk.js.map",
     "index.html": "/pmaa-app/index.html",
     "static/css/main.6dea0f05.chunk.css.map": "/pmaa-app/static/css/main.6dea0f05.chunk.css.map",
-    "static/js/2.35c47730.chunk.js.LICENSE.txt": "/pmaa-app/static/js/2.35c47730.chunk.js.LICENSE.txt"
+    "static/js/2.5d7eda00.chunk.js.LICENSE.txt": "/pmaa-app/static/js/2.5d7eda00.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.76e408f5.js",
-    "static/js/2.35c47730.chunk.js",
+    "static/js/2.5d7eda00.chunk.js",
     "static/css/main.6dea0f05.chunk.css",
-    "static/js/main.cf5431e0.chunk.js"
+    "static/js/main.eb093793.chunk.js"
   ]
 }
