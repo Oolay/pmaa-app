@@ -5,7 +5,7 @@ import { AxisLeft, AxisBottom } from '@vx/axis'
 import { Group } from '@vx/group'
 import { scaleLinear } from '@vx/scale'
 
-import { getMinMaxOfDataSets, MinMax } from '../../utils'
+import { makeMinMaxOfDataSets, MinMax } from '../../utils'
 import { Pmaa } from '../../data/pmaaDetails'
 
 const useStyles = makeStyles({
@@ -81,7 +81,7 @@ const Graph: React.FC<Props> = ({ dataSets, onDataZoom }) => {
     const yGraphMax = GRAPH_HEIGHT - GRAPH_MARGIN.top - 50
 
     // DataSets bounds
-    const { minX, maxX, minY, maxY } = getMinMaxOfDataSets(data)
+    const { minX, maxX, minY, maxY } = makeMinMaxOfDataSets(data)
 
     const xScale = scaleLinear({
         domain: [minX, maxX],

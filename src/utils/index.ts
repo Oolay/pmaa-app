@@ -16,7 +16,7 @@ export const isSamePmaa = (pmaa1: Pmaa, pmaa2: Pmaa) => (
     pmaa1.name === pmaa2.name && pmaa1.linkage === pmaa2.linkage
 )
 
-export function getRandomHexColor(): string {
+export function makeRandomHexColor(): string {
     const randomColor = Math.floor(Math.random()*16777215).toString(16)
 
     return "#" + randomColor
@@ -26,7 +26,7 @@ function isHexColor(color : string) {
     return /^#([A-Fa-f0-9]{6}$)/.test(color)
 }
 
-export function getStatusTextColor(backgroundHexColor : string) {
+export function makeStatusTextColor(backgroundHexColor : string) {
     // default to black if invalid colour used
     if (!isHexColor(backgroundHexColor)) {
         return PRIMARY_TEXT_COLOR
@@ -48,7 +48,7 @@ export interface MinMax {
     maxY: number
 }
 
-export function getMinMax(data: DataPoint[]): MinMax {
+export function makeMinMax(data: DataPoint[]): MinMax {
     return data.reduce(({ minX, maxX, minY, maxY }, { x, y }) => {
         const newMinX = x < minX ? x : minX
         const newMaxX = x > maxX ? x : maxX
@@ -69,8 +69,8 @@ export function getMinMax(data: DataPoint[]): MinMax {
     })
 }
 
-export function getMinMaxOfDataSets(dataSets: DataPoint[][]): MinMax {
+export function makeMinMaxOfDataSets(dataSets: DataPoint[][]): MinMax {
     const flatData = dataSets.reduce((flatDataSets, dataSet) => [...flatDataSets, ...dataSet], [])
 
-    return getMinMax(flatData)
+    return makeMinMax(flatData)
 }

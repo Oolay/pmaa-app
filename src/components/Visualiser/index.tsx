@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/styles'
 
-import {isSamePmaa, replacePmaa, MinMax, getRandomHexColor, getStatusTextColor } from '../../utils'
+import {isSamePmaa, replacePmaa, MinMax, makeRandomHexColor, makeStatusTextColor } from '../../utils'
 
 import { pmaaData, Pmaa } from '../../data/pmaaDetails'
 
@@ -105,7 +105,7 @@ const Visualiser: React.FC = () => {
     const handlePmaaColorChange = (pmaa: Pmaa) => () => {
         const newPmaa = {
             ...pmaa,
-            color: getRandomHexColor()
+            color: makeRandomHexColor()
         }
 
         setSelectedPmaas(prevSelected => replacePmaa(prevSelected, newPmaa))
@@ -161,7 +161,7 @@ const Visualiser: React.FC = () => {
                                             className={classes.legendItem}
                                             style={{
                                                 backgroundColor: `${pmaa.color}`,
-                                                color: getStatusTextColor(pmaa.color)
+                                                color: makeStatusTextColor(pmaa.color)
                                             }}
                                             onClick={handlePmaaColorChange(pmaa)}
                                         >

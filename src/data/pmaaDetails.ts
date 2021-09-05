@@ -1,6 +1,6 @@
-import getMockData from './getMockData'
+import makeMockData from './getMockData'
 import { DataPoint } from '../components/Visualiser/Graph'
-import { getRandomHexColor } from '../utils'
+import { makeRandomHexColor } from '../utils'
 
 export interface Pmaa {
     groupName: string
@@ -11,8 +11,8 @@ export interface Pmaa {
 }
 
 function addDataSetAndColor(pmaa: Pick<Pmaa, 'name' | 'linkage'>) {
-    const data = getMockData(200)
-    const color = getRandomHexColor()
+    const data = makeMockData(200)
+    const color = makeRandomHexColor()
 
 
     return { ...pmaa, data, color }

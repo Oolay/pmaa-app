@@ -1,6 +1,6 @@
 import { DataPoint } from '../components/Visualiser/Graph'
 
-function getMockData(nPoints: number): DataPoint[] {
+function makeMockData(nPoints: number): DataPoint[] {
     return Array(nPoints).fill(1).map((_, i) => {
         const x = i + 1
 
@@ -16,4 +16,4 @@ function getMockData(nPoints: number): DataPoint[] {
 
 }
 
-export default getMockData
+export default makeMockData
