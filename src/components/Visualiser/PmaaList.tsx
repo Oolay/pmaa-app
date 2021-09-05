@@ -47,10 +47,10 @@ interface Props {
     columns: string[]
     rows: string[]
     selectedPmaas: Pmaa[]
-    onPmaaClick: (pmaa: Pmaa) => () => void
+    onPmaaClick: (pmaa: Pmaa) => void
 }
 
-const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, onPmaaClick }) => {
+export const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, onPmaaClick }) => {
     const classes = useStyles({})
     const isPmaaSelected = (selectedPmaa: Pmaa) => selectedPmaas.some(pmaa => isSamePmaa(selectedPmaa,pmaa))
 
@@ -89,7 +89,7 @@ const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, on
                             <div
                                 className={classes.contentItem}
                                 style={isPmaaSelected(pmaa) ? {backgroundColor: `${pmaa.color}`} : {}}
-                                onClick={onPmaaClick(pmaa)}
+                                onClick={() => onPmaaClick(pmaa)}
                             >
                                 &nbsp;
                             </div>
@@ -120,5 +120,3 @@ const PmaaList: React.FC<Props> = ({ pmaaGroup, columns, rows, selectedPmaas, on
         </div>
     )
 }
-
-export default PmaaList

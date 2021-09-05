@@ -10,6 +10,11 @@ export interface Pmaa {
     color: string
 }
 
+export interface PmaaData {
+    groupName: string
+    items: Pmaa[]
+}
+
 function addDataSetAndColor(pmaa: Pick<Pmaa, 'name' | 'linkage'>) {
     const data = makeMockData(200)
     const color = makeRandomHexColor()
@@ -222,7 +227,7 @@ const pmaas = [
     }
 ]
 
-export const pmaaData = pmaas.map((group) => ({
+export const pmaaData: PmaaData[] = pmaas.map((group) => ({
     ...group,
     items: group.items.map(item => ({ ...addDataSetAndColor(item), groupName: group.groupName }))
 }))

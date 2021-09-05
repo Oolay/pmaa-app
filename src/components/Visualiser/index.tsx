@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/styles'
 
-import {isSamePmaa, replacePmaa, MinMax, makeRandomHexColor, makeStatusTextColor } from '../../utils'
+import {isSamePmaa, replacePmaa, MinMax, makeRandomHexColor } from '../../utils'
 
-import { pmaaData, Pmaa } from '../../data/pmaaDetails'
+import { pmaaData, Pmaa, PmaaData } from '../../data/pmaaDetails'
 
 import ActionButtons, { ACTION_BUTTONS_HEIGHT } from './ActionButtons'
 import Graph, { GRAPH_HEIGHT, GRAPH_WIDTH, GRAPH_MARGIN } from './Graph'
-import PmaaGrid from './PmaaGrid'
+import { Legend } from './Legend'
+import { PmaaPicker } from './PmaaPicker'
 
 const GRAPH_CONTAINER_HEIGHT =  GRAPH_HEIGHT + ACTION_BUTTONS_HEIGHT + GRAPH_MARGIN.top + GRAPH_MARGIN.bottom
 
@@ -26,13 +27,6 @@ const useStyles = makeStyles({
         height: GRAPH_CONTAINER_HEIGHT,
         width: GRAPH_WIDTH + GRAPH_MARGIN.left + GRAPH_MARGIN.right,
     },
-    gridContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        height: `calc(100% - ${GRAPH_CONTAINER_HEIGHT}px)`,
-        overflowY: 'scroll',
-        marginTop: '16px',
-    },
     emptyTextContainer: {
         display: 'flex',
         justifyContent: 'center',
@@ -41,23 +35,9 @@ const useStyles = makeStyles({
         padding: '16px',
         flex: 1,
     },
-    legendContainer: {
-        textAlign: 'center',
-        fontSize: '12px',
-        overflowy: 'scroll',
-        flex: 1,
-    },
-    legendItem: {
-        display: 'inline-block',
-        borderRadius: '6px',
-        border: '1px solid #d3d3d3',
-        margin: '2px',
-        padding: '1px',
-        width: '90px',
-        "&:hover": {
-            backgroundColor: '#d3d3d3',
-        },
-    },
+    pickerContainer: {
+        height: `calc(100% - ${GRAPH_CONTAINER_HEIGHT}px)`,
+    }
 })
 
 type DataSetZoomHistory = Pmaa[]
@@ -66,13 +46,13 @@ const Visualiser: React.FC = () => {
     const classes = useStyles({})
     const [graphData, setGraphData] = useState<DataSetZoomHistory[]>([])
     const [selectedPmaas, setSelectedPmaas] = useState<Pmaa[]>([])
-    const [rawPmaaData, setRawPmaaData] = useState(pmaaData)
+    const [rawPmaaData, setRawPmaaData] = useState<PmaaData[]>(pmaaData)
 
     const isPmaaSelected = (selectedPmaa: Pmaa) => (
         selectedPmaas.some(pmaa => isSamePmaa(selectedPmaa, pmaa))
     )
  
-    const handleItemClick = (selectedPmaa: Pmaa) => () => {
+    const handlePmaaClick = (selectedPmaa: Pmaa) => {
         if (isPmaaSelected(selectedPmaa)) {
             setSelectedPmaas((prevSelected) => (
                 prevSelected.filter(pmaa => !isSamePmaa(selectedPmaa, pmaa))
@@ -102,7 +82,7 @@ const Visualiser: React.FC = () => {
         setGraphData(prevState => [...prevState, [...newData]])
     }
 
-    const handlePmaaColorChange = (pmaa: Pmaa) => () => {
+    const handlePmaaColorChange = (pmaa: Pmaa) => {
         const newPmaa = {
             ...pmaa,
             color: makeRandomHexColor()
@@ -153,23 +133,7 @@ const Visualiser: React.FC = () => {
                                 dataSets={getLatestZoomData(graphData)}
                                 onDataZoom={handleDataZoom}
                             />
-                            <div className={classes.legendContainer}>
-                                {selectedPmaas.map(pmaa => {
-                                    return (
-                                        <div
-                                            key={`${pmaa.linkage}-${pmaa.name}`}
-                                            className={classes.legendItem}
-                                            style={{
-                                                backgroundColor: `${pmaa.color}`,
-                                                color: makeStatusTextColor(pmaa.color)
-                                            }}
-                                            onClick={handlePmaaColorChange(pmaa)}
-                                        >
-                                            {`${pmaa.linkage}-${pmaa.name}`}
-                                        </div>
-                                    )
-                                })}
-                            </div>
+                            <Legend pmaas={selectedPmaas} handlePmaaColorChange={handlePmaaColorChange}/>
                         </>
                     ) : (
                         <div className={classes.emptyTextContainer}>
@@ -178,25 +142,12 @@ const Visualiser: React.FC = () => {
                     )
                 }
             </div>
-            <div className={classes.gridContainer}>
-                {
-                    rawPmaaData.map(groupData => {
-    
-                        const columns = new Set(groupData.items.map(item => item.name))
-                        const rows = new Set(groupData.items.map(item => item.linkage))
-    
-                        return (
-                            <PmaaGrid
-                                key={groupData.groupName}
-                                pmaaGroup={groupData}
-                                columns={Array.from(columns)}
-                                rows={Array.from(rows)}
-                                selectedPmaas={selectedPmaas}
-                                onPmaaClick={handleItemClick}
-                            />
-                        )
-                    })
-                }
+            <div className={classes.pickerContainer}>
+                <PmaaPicker
+                    pmaaData={rawPmaaData}
+                    selectedPmaas={selectedPmaas}
+                    handlePmaaClick={handlePmaaClick}
+                />
             </div>
         </div>
     )
